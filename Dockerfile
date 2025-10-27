@@ -1,5 +1,5 @@
 # --- Base image ---
-FROM runpod/base:0.4.0-cuda12.1.1
+FROM runpod/pytorch:3.10-2.1.0
 
 # --- Working directory ---
 WORKDIR /workspace
