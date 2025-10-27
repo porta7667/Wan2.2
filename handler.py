@@ -18,7 +18,6 @@ def handler(event):
         output_path = "/workspace/output/video.mp4"
         if os.path.exists(output_path):
             with open(output_path, "rb") as f:
-                encoded = base64.b64encode(f.read()).decode("utf-8")
             encoded = base64.b64encode(f.read()).decode("utf-8")
 
 
