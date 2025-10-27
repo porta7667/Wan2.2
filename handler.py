@@ -19,7 +19,8 @@ def handler(event):
         if os.path.exists(output_path):
             with open(output_path, "rb") as f:
                 encoded = base64.b64encode(f.read()).decode("utf-8")
-            return {"video_base64": encoded}
+            encoded = base64.b64encode(f.read()).decode("utf-8")
+
 
         return {
             "error": "⚠️ Video not found at /workspace/output/video.mp4",
