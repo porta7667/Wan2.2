@@ -14,6 +14,7 @@ COPY . .
 
 # --- Install Python dependencies ---
 RUN pip install --upgrade pip \
+ && pip install packaging \
  && pip install \
       torch==2.5.1+cu121 \
       torchvision==0.20.1+cu121 \
@@ -21,6 +22,7 @@ RUN pip install --upgrade pip \
       --index-url https://download.pytorch.org/whl/cu121 \
  && pip install --no-build-isolation flash-attn==2.8.3 \
  && pip install -r requirements.txt
+
 
 
 
