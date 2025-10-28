@@ -1,7 +1,10 @@
 # --- Base image ---
 FROM nvidia/cuda:12.1.1-base-ubuntu22.04
 
-
+# --- Install Python and system dependencies ---
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip git && \
+    rm -rf /var/lib/apt/lists/*
 
 # --- Working directory ---
 WORKDIR /workspace
@@ -16,3 +19,4 @@ RUN pip install --upgrade pip && \
 
 # --- Default command ---
 CMD ["python3", "-u", "handler.py"]
+
