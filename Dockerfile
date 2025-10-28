@@ -1,5 +1,6 @@
 # --- Base image ---
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+FROM nvidia/cuda:12.1.1-base-ubuntu22.04
+
 
 
 # --- Working directory ---
