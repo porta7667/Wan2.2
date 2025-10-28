@@ -14,14 +14,15 @@ COPY . .
 
 # --- Install Python dependencies ---
 RUN pip install --upgrade pip \
- && pip install packaging \
- && pip install \
+ && python3 -m pip install --no-cache-dir packaging setuptools wheel \
+ && python3 -m pip install --no-cache-dir \
       torch==2.5.1+cu121 \
       torchvision==0.20.1+cu121 \
       torchaudio==2.5.1+cu121 \
       --index-url https://download.pytorch.org/whl/cu121 \
- && pip install --no-build-isolation flash-attn==2.8.3 \
- && pip install -r requirements.txt
+ && python3 -m pip install --no-build-isolation --no-cache-dir flash-attn==2.8.3 \
+ && python3 -m pip install --no-cache-dir -r requirements.txt
+
 
 
 
