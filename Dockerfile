@@ -13,9 +13,11 @@ WORKDIR /workspace
 COPY . .
 
 # --- Install Python dependencies ---
-RUN pip install --upgrade pip && \
-    pip install -r requirements.txt && \
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+RUN pip install --upgrade pip \
+ && pip install torch==2.9.0 torchvision==0.24.0 torchaudio==2.9.0 \
+        --index-url https://download.pytorch.org/whl/cu121 \
+ && pip install -r requirements.txt
+
 
 # --- Default command ---
 CMD ["python3", "-u", "handler.py"]
