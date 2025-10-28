@@ -1,5 +1,6 @@
 # --- Base image ---
-FROM runpod/pytorch:3.10-2.1.0
+RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+
 
 # --- Working directory ---
 WORKDIR /workspace
