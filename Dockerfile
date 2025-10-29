@@ -1,33 +1,33 @@
-# --- Base image ---
-FROM nvidia/cuda:12.1.1-base-ubuntu22.04
+# Use NVIDIA CUDA runtime image
+FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
 
-# --- Install Python and system dependencies ---
-RUN apt-get update && \
-    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive \
+    TORCH_CUDA_INDEX_URL=https://download.pytorch.org/whl/cu121 \
+    CUDA_HOME=/usr/local/cuda \
+    PATH=/usr/local/cuda/bin:$PATH \
+    LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     python3-dev \
     git \
     build-essential \
     cuda-toolkit-12-1 \
+    cuda-libraries-dev-12-1 \
     && rm -rf /var/lib/apt/lists/*
 
-# --- Set environment variables ---
-ENV TORCH_CUDA_INDEX_URL=https://download.pytorch.org/whl/cu121 \
-    CUDA_HOME=/usr/local/cuda \
-    PATH=/usr/local/cuda/bin:$PATH \
-    FORCE_CUDA=1 \
-    TORCH_CUDA_ARCH_LIST="7.0;7.5;8.0;8.6"
-
-# --- Working directory ---
+# Set working directory
 WORKDIR /workspace
 
-# --- Copy requirements first ---
+# Copy requirements first
 COPY requirements.txt .
 
-# --- Install PyTorch and dependencies in stages ---
+# Install Python dependencies in stages
 RUN python3 -m pip install --upgrade pip && \
-    # Stage 1: Install build tools
+    # Base tools
     python3 -m pip install --no-cache-dir \
     packaging \
     setuptools \
@@ -35,24 +35,19 @@ RUN python3 -m pip install --upgrade pip && \
     pybind11 \
     cmake \
     ninja && \
-    # Stage 2: Install PyTorch
+    # PyTorch with CUDA support
     python3 -m pip install --no-cache-dir --extra-index-url ${TORCH_CUDA_INDEX_URL} \
     torch==2.5.1+cu121 \
     torchvision==0.20.1+cu121 \
     torchaudio==2.5.1+cu121 && \
-    python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA not available'"
+    # Verify CUDA availability
+    python3 -c "import torch; print('CUDA available:', torch.cuda.is_available())"
 
-# --- Install project requirements ---
-RUN pip install --no-cache-dir -r requirements.txt
+# Install project requirements
+RUN python3 -m pip install --no-cache-dir -r requirements.txt
 
-# --- Copy remaining project files ---
+# Copy remaining project files
 COPY . .
 
-# --- Install Flash Attention (optional) ---
-ARG INSTALL_FLASH_ATTN=false
-RUN if [ "${INSTALL_FLASH_ATTN}" = "true" ]; then \
-        python3 -m pip install --no-cache-dir flash-attn==2.8.3; \
-    fi
-
-# --- Default command ---
+# Default command
 CMD ["python3", "-u", "handler.py"]
