@@ -11,20 +11,19 @@ RUN apt-get update && \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# --- Working directory ---
-WORKDIR /workspace
-
 # --- Set environment variables ---
 ENV TORCH_CUDA_INDEX_URL=https://download.pytorch.org/whl/cu121 \
     CUDA_HOME=/usr/local/cuda \
     PATH=/usr/local/cuda/bin:$PATH \
     FORCE_CUDA=1
 
-# --- Copy only requirements first ---
+# --- Working directory ---
+WORKDIR /workspace
+
+# --- Copy requirements first ---
 COPY requirements.txt .
 
-# --- Install dependencies in stages ---
-# Stage 1: Basic Python tools
+# --- Install base dependencies ---
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install --no-cache-dir \
     packaging \
@@ -34,27 +33,24 @@ RUN python3 -m pip install --upgrade pip && \
     cmake \
     ninja
 
-# Stage 2: PyTorch installation
+# --- Install PyTorch ---
 RUN python3 -m pip install --no-cache-dir --extra-index-url ${TORCH_CUDA_INDEX_URL} \
     torch==2.5.1+cu121 \
     torchvision==0.20.1+cu121 \
     torchaudio==2.5.1+cu121 && \
     python3 -c "import torch; print('Torch', torch.__version__, 'available.')"
 
-# Stage 3: Install requirements
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
-
-# Stage 4: Flash Attention (optional)
-ARG INSTALL_FLASH_ATTN=false
-RUN if [ "${INSTALL_FLASH_ATTN}" = "true" ]; then \
-        echo "Attempting flash-attn install" && \
-        python3 -m pip install --no-cache-dir flash-attn==2.8.3; \
-    else \
-        echo "Skipping flash-attn install"; \
-    fi
+# --- Install requirements ---
+RUN python3 -m pip install --no-cache-dir --verbose -r requirements.txt
 
 # --- Copy remaining project files ---
 COPY . .
+
+# --- Install Flash Attention (optional) ---
+ARG INSTALL_FLASH_ATTN=false
+RUN if [ "${INSTALL_FLASH_ATTN}" = "true" ]; then \
+        python3 -m pip install --no-cache-dir flash-attn==2.8.3; \
+    fi
 
 # --- Default command ---
 CMD ["python3", "-u", "handler.py"]
