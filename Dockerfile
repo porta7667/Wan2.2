@@ -2,6 +2,7 @@
 FROM nvidia/cuda:12.1.1-base-ubuntu22.04
 
 # --- Install Python and system dependencies ---
+# 👇 This section is key — note the addition of git
 RUN apt-get update && \
     apt-get install -y python3 python3-pip git && \
     rm -rf /var/lib/apt/lists/*
@@ -20,13 +21,9 @@ RUN pip install --upgrade pip \
       torchvision==0.20.1+cu121 \
       torchaudio==2.5.1+cu121 \
       --index-url https://download.pytorch.org/whl/cu121 \
- && python3 -m pip install --no-build-isolation --no-cache-dir flash-attn==2.8.3 \
+ && python3 -m pip install --no-cache-dir --no-build-isolation flash-attn==2.8.3 \
+ || (echo "⚠️ flash-attn skipped; attention optimizations disabled" && true) \
  && python3 -m pip install --no-cache-dir -r requirements.txt
-
-
-
-
-
 
 # --- Default command ---
 CMD ["python3", "-u", "handler.py"]
