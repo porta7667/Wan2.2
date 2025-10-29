@@ -1,58 +1,37 @@
 # --- Base image ---
-FROM nvidia/cuda:12.1.1-runtime-ubuntu22.04
+FROM nvidia/cuda:12.1.1-base-ubuntu22.04
 
-# --- Environment variables ---
-ENV DEBIAN_FRONTEND=noninteractive \
-    TORCH_CUDA_INDEX_URL=https://download.pytorch.org/whl/cu121 \
-    CUDA_HOME=/usr/local/cuda \
-    PATH=/usr/local/cuda/bin:$PATH \
-    LD_LIBRARY_PATH=/usr/local/cuda/lib64:$LD_LIBRARY_PATH
+# --- Set environment variables for non-interactive installs ---
+ENV DEBIAN_FRONTEND=noninteractive
 
 # --- Install system dependencies ---
-RUN apt-get update && \
-    apt-get install -y \
-    python3 \
-    python3-pip \
-    python3-dev \
-    git \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip git && rm -rf /var/lib/apt/lists/*
 
 # --- Working directory ---
 WORKDIR /workspace
 
-# --- Copy requirements first ---
-COPY requirements.txt .
-
-# --- Install PyTorch and dependencies ---
-RUN python3 -m pip install --upgrade pip && \
-    # Base tools
-    python3 -m pip install --no-cache-dir \
-    packaging \
-    setuptools \
-    wheel \
-    pybind11 \
-    cmake \
-    ninja && \
-    # PyTorch with CUDA
-    python3 -m pip install --no-cache-dir --extra-index-url ${TORCH_CUDA_INDEX_URL} \
-    torch==2.5.1+cu121 \
-    torchvision==0.20.1+cu121 \
-    torchaudio==2.5.1+cu121 && \
-    # Verify PyTorch installation
-    python3 -c "import torch; print('PyTorch', torch.__version__)"
-
-# --- Install Flash Attention (optional) ---
-ARG INSTALL_FLASH_ATTN=false
-RUN if [ "${INSTALL_FLASH_ATTN}" = "true" ]; then \
-        python3 -m pip install --no-cache-dir flash-attn==2.8.3; \
-    fi
-
-# --- Install remaining requirements ---
-RUN python3 -m pip install --no-cache-dir -r requirements.txt
-
 # --- Copy project files ---
 COPY . .
+
+# --- Install Python dependencies ---
+ENV TORCH_CUDA_INDEX_URL=https://download.pytorch.org/whl/cu121 \
+    PIP_NO_CACHE_DIR=1
+ARG INSTALL_FLASH_ATTN=false
+RUN python3 -m pip install --upgrade pip && \
+    python3 -m pip install packaging setuptools wheel pybind11 cmake ninja && \
+    python3 -m pip install --extra-index-url ${TORCH_CUDA_INDEX_URL} \
+      torch==2.5.1+cu121 \
+      torchvision==0.20.1+cu121 \
+      torchaudio==2.5.1+cu121 && \
+    python3 -c "import torch; print('Torch', torch.__version__, 'available.')" && \
+    if [ "${INSTALL_FLASH_ATTN}" = "true" ]; then \
+        echo "Attempting flash-attn install"; \
+        python3 -m pip install --no-build-isolation flash-attn==2.8.3 && \
+            echo "flash-attn installed"; \
+    else \
+        echo "Skipping flash-attn install (set INSTALL_FLASH_ATTN=true to attempt)"; \
+    fi && \
+    python3 -m pip install -r requirements.txt
 
 # --- Default command ---
 CMD ["python3", "-u", "handler.py"]
