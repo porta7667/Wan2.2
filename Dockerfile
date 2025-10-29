@@ -1,3 +1,18 @@
+# --- Base image ---
+FROM nvidia/cuda:12.1.1-base-ubuntu22.04
+
+# --- Install Python and system dependencies ---
+RUN apt-get update && \
+    apt-get install -y python3 python3-pip git && \
+    rm -rf /var/lib/apt/lists/*
+
+# --- Working directory ---
+WORKDIR /workspace
+
+# --- Copy project files ---
+COPY . .
+
+# --- Install Python dependencies ---
 ENV TORCH_CUDA_INDEX_URL=https://download.pytorch.org/whl/cu121 \
     PIP_NO_BUILD_ISOLATION=1
 ARG INSTALL_FLASH_ATTN=false
@@ -20,4 +35,4 @@ RUN python3 -m pip install --upgrade pip \
     fi \
  && python3 -m pip install --no-cache-dir -r requirements.txt
 
-
+# --- Default command ---
