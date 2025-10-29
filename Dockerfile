@@ -5,7 +5,7 @@ FROM nvidia/cuda:12.1.1-base-ubuntu22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # --- Install system dependencies ---
-RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip git && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends python3 python3-pip git libgl1-mesa-glx && rm -rf /var/lib/apt/lists/*
 
 # --- Working directory ---
 WORKDIR /workspace
@@ -35,3 +35,4 @@ RUN python3 -m pip install --upgrade pip && \
 
 # --- Default command ---
 CMD ["python3", "-u", "handler.py"]
+
