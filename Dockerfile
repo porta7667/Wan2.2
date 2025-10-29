@@ -36,3 +36,4 @@ RUN python3 -m pip install --upgrade pip \
  && python3 -m pip install --no-cache-dir -r requirements.txt
 
 # --- Default command ---
+CMD ["python3", "-u", "handler.py"]
