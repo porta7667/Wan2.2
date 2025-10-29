@@ -17,13 +17,13 @@ COPY . .
 ENV TORCH_CUDA_INDEX_URL=https://download.pytorch.org/whl/cu121 \
     PIP_NO_CACHE_DIR=1
 ARG INSTALL_FLASH_ATTN=false
-RUN python3 -m pip install --upgrade pip && \&& \ \
-    python3 -m pip install packaging setuptools wheel pybind13 cmake ninja && \&& \ \
+RUN python3 -m pip install --upgrade pip && \
+    python3 -m pip install packaging setuptools wheel pybind13 cmake ninja && \
     python3 -m pip install --extra-index-url ${TORCH_CUDA_INDEX_URL} \
       torch==2.5.1+cu121 \
       torchvision==0.20.1+cu121 \
-      torchaudio==2.5.1+cu121 && \&& \ \
-    python3 -c "import torch; print('Torch', torch.__version__, 'available.')" && \&& \ \
+      torchaudio==2.5.1+cu121 && \
+    python3 -c "import torch; print('Torch', torch.__version__, 'available.')" && \
     if [ "${INSTALL_FLASH_ATTN}" = "true" ]; then \
         echo "Attempting flash-attn install"; \
         python3 -m pip install --no-build-isolation flash-attn==2.8.3 && \$
