@@ -32,8 +32,9 @@ RUN python3 -m pip install --upgrade pip && \
         echo "Skipping flash-attn install (set INSTALL_FLASH_ATTN=true to attempt)"; \
     fi
 
-RUN python3 -m pip install -r requirements.txt
+RUN python3 -m pip install --no-build-isolation -r requirements.txt
 
 # --- Default command ---
 CMD ["python3", "-u", "handler.py"]
+
 
