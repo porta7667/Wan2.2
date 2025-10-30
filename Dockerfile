@@ -16,6 +16,7 @@ COPY . .
 # --- Install Python dependencies ---
 ENV TORCH_CUDA_INDEX_URL=https://download.pytorch.org/whl/cu121 \
     PIP_NO_CACHE_DIR=1
+ENV CUDA_HOME=/usr/local/cuda-12.1
 ARG INSTALL_FLASH_ATTN=false
 RUN python3 -m pip install --upgrade pip && \
     python3 -m pip install packaging setuptools wheel pybind11 cmake ninja && \
@@ -36,5 +37,7 @@ RUN python3 -m pip install --no-build-isolation -r requirements.txt
 
 # --- Default command ---
 CMD ["python3", "-u", "handler.py"]
+
+
 
 
